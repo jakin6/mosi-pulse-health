@@ -516,7 +516,7 @@ function stockHealth(b: Base): BranchRow["stockHealth"] {
 }
 
 export function getBusinessHealth(branchId: BranchId, periodId: PeriodId) {
-  const period = PERIODS.find((p) => p.id === periodId) ?? PERIODS[3];
+  const period = PERIODS.find((p) => p.id === periodId) ?? PERIODS[3]!;
   const f = period.factor;
   const rows = branchId === "all" ? BASE : BASE.filter((b) => b.id === branchId);
   const scoped = rows.length ? rows : BASE;
@@ -536,23 +536,23 @@ export function getBusinessHealth(branchId: BranchId, periodId: PeriodId) {
   const health = Math.round(weighted(scoped, (b) => b.health));
   const prevHealth = Math.round(weighted(scoped, (b) => b.prevHealth));
 
-  const factors = scoped[0].factors.map((factor, i) => ({
+  const factors = scoped[0]!.factors.map((factor, i) => ({
     label: factor.label,
-    score: Math.round(weighted(scoped, (b) => b.factors[i].score)),
+    score: Math.round(weighted(scoped, (b) => b.factors[i]!.score)),
   }));
 
   const shape = period.points.map((_, i) => {
-    const source = scoped[0].shape;
+    const source = scoped[0]!.shape;
     const idx = i % source.length;
-    return scoped.reduce((t, b) => t + b.shape[idx], 0) / scoped.length;
+    return scoped.reduce((t, b) => t + b.shape[idx]!, 0) / scoped.length;
   });
   const shapeTotal = shape.reduce((t, v) => t + v, 0);
 
   const series = (value: number, prevValue: number) =>
     period.points.map((label, i) => ({
       label,
-      current: (value * shape[i]) / shapeTotal,
-      previous: (prevValue * (shape[i] * 0.94 + 0.03)) / shapeTotal,
+      current: (value * shape[i]!) / shapeTotal,
+      previous: (prevValue * (shape[i]! * 0.94 + 0.03)) / shapeTotal,
     }));
 
   const prevOf = (value: number, pct: number) => value / (1 + pct / 100);
@@ -637,7 +637,7 @@ export function getBusinessHealth(branchId: BranchId, periodId: PeriodId) {
     {
       tone: growth >= 0 ? "good" : "bad",
       title: growth >= 0 ? "Business is growing" : "Business is contracting",
-      detail: `Revenue ${growth >= 0 ? "up" : "down"} ${Math.abs(growth).toFixed(1)}% versus ${period.previousRange}, led by ${branchRows[0].name}.`,
+      detail: `Revenue ${growth >= 0 ? "up" : "down"} ${Math.abs(growth).toFixed(1)}% versus ${period.previousRange}, led by ${branchRows[0]!.name}.`,
     },
     {
       tone: grossMargin >= prevGrossMargin ? "good" : "warn",
@@ -680,11 +680,11 @@ export function getBusinessHealth(branchId: BranchId, periodId: PeriodId) {
 
   const medicines =
     branchId === "all"
-      ? TOP_MEDICINES["centre-ville"].map((m, i) => ({
+      ? TOP_MEDICINES["centre-ville"]!.map((m, i) => ({
           ...m,
           units: Object.values(TOP_MEDICINES).reduce((t, list) => t + (list[i]?.units ?? 0), 0),
         }))
-      : TOP_MEDICINES[branchId];
+      : TOP_MEDICINES[branchId]!;
 
   return {
     period,
